@@ -48,3 +48,15 @@ describe('POST /todos', () => {
             })
     })
 })
+
+describe('Get /todos', () => {
+    it('should return all todos', (done) => {
+        request(app)
+            .get('/todos')
+            .expect(200)
+            .expect(res => {
+                expect(res.body.todos.length).toBe(0)
+            })
+            .end(done)
+    })
+})
