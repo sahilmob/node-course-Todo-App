@@ -1,3 +1,5 @@
+require('./config/config.js')
+
 var express = require('express')
 var bodyParser = require('body-parser')
 var { ObjectID } = require('mongodb')
@@ -7,7 +9,7 @@ var { mongoose } = require('./db/mongoose')
 var { Todo } = require('./models/todo.js')
 var { User } = require('./models/user.js')
 
-var port = process.env.PORT || 3000
+var port = process.env.PORT
 
 var app = express()
 
