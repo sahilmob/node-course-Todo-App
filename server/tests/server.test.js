@@ -10,7 +10,9 @@ const todos = [{
     text: 'First test todo'
 }, {
     _id: new ObjectID(),
-    text: 'Second test todo'
+    text: 'Second test todo',
+    completed: true,
+    completedAt: 333
 }]
 
 // // beforeEach((done) => {
@@ -117,11 +119,17 @@ describe("DELETE /todos/:id", () => {
             .delete(`/todos/${aid}`)
             .expect(200)
             .expect(res => {
+
+                // This is assertion about the response of the request
+
                 expect(res.body.deletedTodo._id).toBe(aid)
             }).end((err, res) => {
                 if (err) {
                     return done(err)
                 }
+
+                // This is assertion about the existance of the doc. (another request using ORM) 
+
                 Todo.findById(aid).then(todo => {
                     expect(todo).toBe(null)
                     done()
@@ -144,5 +152,50 @@ describe("DELETE /todos/:id", () => {
             .delete('/todos/aaa')
             .expect(400)
             .end(done)
+    })
+})
+
+describe('PATCH /todos/:id', () => {
+    it('should update the todo', (done) => {
+        var id = todos[0]._id.toHexString()
+        var text = "This is should new text"
+        request(app)
+            .patch(`/todos/${id}`)
+            .send({
+                text,
+                completed: true
+            })
+            .expect(200)
+            // This is assertion about the response of the request
+            .expect(res => {
+                expect(res.body.todo.text).toBe(text)
+                expect(res.body.todo.completed).toBe(true)
+                expect(res.body.todo.completedAt).toBeA('number')
+            }).end(done)
+
+
+    })
+
+    it('should clear completed when todo is not completed', (done) => {
+        var id = todos[1]._id.toHexString()
+        var text = "Seconde todo new text test"
+
+        request(app)
+            .patch(`/todos/${id}`)
+            .send({
+                text,
+                completed: false
+            })
+            .expect(200)
+            .end(done)
+
+        Todo.findById(id).then(todo => {
+            expect(todo.text).toBe(text)
+            expect(todo.completed).toBe(false)
+            expect(todo.completedAt).toNotExist()
+        }).catch(err => {
+            end(done)
+        })
+
     })
 })
