@@ -21,9 +21,9 @@ app.post('/todos', (req, res) => {
         text: req.body.text
     })
     todo.save().then(doc => {
-        res.send(doc)
+        res.status(200).send(doc)
     }, e => {
-        res.send(e)
+        res.status(400).send(e)
     })
 })
 
@@ -50,7 +50,7 @@ app.get('/todos/:id', (req, res) => {
             res.send(err)
         })
     } else {
-        res.status(400).send({
+        res.status(404).send({
             message: 'Id invalid'
         })
     }
@@ -75,7 +75,7 @@ app.delete('/todos/:id', (req, res) => {
             res.send(err)
         })
     } else {
-        res.status(400).send({
+        res.status(404).send({
             message: 'Id invalid'
         })
     }
@@ -95,7 +95,7 @@ app.get('/todos/:id', (req, res) => {
             res.send(err)
         })
     } else {
-        res.status(400).send({
+        res.status(404).send({
             message: 'Id invalid'
         })
     }
@@ -138,6 +138,7 @@ app.get('/users/me', authenticate, (req, res) => {
 app.post('/users', (req, res) => {
     var body = _.pick(req.body, ['email', 'password'])
     var user = new User(body)
+        //we are not passing user in (then()) because the is only one (user) var in the function 
 
     user.save().then(() => {
         return user.generateAuthToken()

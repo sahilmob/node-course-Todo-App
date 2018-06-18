@@ -13,7 +13,7 @@ var UserSchema = new mongoose.Schema({
         unique: true,
         validate: {
             validator: validator.isEmail,
-            message: '{VALUES} is not a valid email'
+            message: '{VALUE} is not a valid email'
         }
     },
     password: {
@@ -34,18 +34,21 @@ var UserSchema = new mongoose.Schema({
     }]
 })
 
+//over-wrights the original method that returns the object when calling POST /users and return only the id and email -and not password- picked by _.pick
 UserSchema.methods.toJSON = function() {
     var user = this;
-    var userObject = user.toObject()
+    var userObject = user.toObject() //convert mongoose object to regular object
 
     return _.pick(userObject, ['_id', 'email'])
 }
 
 UserSchema.methods.generateAuthToken = function() {
+    //this line bind (user) var to the user that we are currently manipulating
     var user = this;
     var access = 'auth'
     var token = jwt.sign({ _id: user._id.toHexString(), access }, 'abc123').toString()
     user.tokens = user.tokens.concat([{ access, token }])
+        //we are not passing token in (then()) because the is only one (token) var in the function 
     return user.save().then(() => {
         return token
     })
@@ -67,6 +70,8 @@ UserSchema.statics.findByToken = function(token) {
     }
     return User.findOne({
         '_id': decoded._id,
+        //we wrapped token.tokens by '' because we want to query a nested item... 
+        //P.S. is is not obligatory to wrap _id with '' because it is not nested, but we could do this for consistency 
         'tokens.token': token,
         'tokens.access': 'auth'
 
