@@ -2,13 +2,23 @@ require('./config/config.js')
 
 var express = require('express')
 var bodyParser = require('body-parser')
-var { ObjectID } = require('mongodb')
+var {
+    ObjectID
+} = require('mongodb')
 var _ = require('lodash')
 
-var { mongoose } = require('./db/mongoose')
-var { Todo } = require('./models/todo.js')
-var { User } = require('./models/user.js')
-var { authenticate } = require('./middleware/authenticate.js')
+var {
+    mongoose
+} = require('./db/mongoose')
+var {
+    Todo
+} = require('./models/todo.js')
+var {
+    User
+} = require('./models/user.js')
+var {
+    authenticate
+} = require('./middleware/authenticate.js')
 
 var port = process.env.PORT
 
@@ -29,7 +39,9 @@ app.post('/todos', (req, res) => {
 
 app.get('/todos', (req, res) => {
     Todo.find({}).then(todos => {
-        res.send({ todos })
+        res.send({
+            todos
+        })
     }).catch(err => {
         res.status(400).send(err)
     })
@@ -44,7 +56,9 @@ app.get('/todos/:id', (req, res) => {
                     message: 'Todo is not exist'
                 })
             } else {
-                res.send({ todo })
+                res.send({
+                    todo
+                })
             }
         }).catch(err => {
             res.send(err)
@@ -89,7 +103,9 @@ app.get('/todos/:id', (req, res) => {
                     message: 'Todo is not exist'
                 })
             } else {
-                res.send({ todo })
+                res.send({
+                    todo
+                })
             }
         }).catch(err => {
             res.send(err)
@@ -118,11 +134,17 @@ app.patch('/todos/:id', (req, res) => {
         body.completedAt = null
     }
 
-    Todo.findByIdAndUpdate(id, { $set: body }, { new: true }).then(todo => {
+    Todo.findByIdAndUpdate(id, {
+        $set: body
+    }, {
+        new: true
+    }).then(todo => {
         if (!todo) {
             return res.status(404).send()
         }
-        res.status(200).send({ todo })
+        res.status(200).send({
+            todo
+        })
 
     }).catch(e => {
         res.send(400).send()
@@ -150,9 +172,21 @@ app.post('/users', (req, res) => {
     })
 })
 
+app.post('/users/login', (req, res) => {
+    var body = _.pick(req.body, ['email', 'password'])
+    User.findByCredentials(body.email, body.password).then((user) => {
+        return user.generateAuthToken().then((token) => {
+            res.header('x-auth', token).send(user)
+        })
+    }).catch((e) => {
+        res.status(400).send()
+    })
+})
 
 
-module.exports = { app }
+module.exports = {
+    app
+}
 
 
 app.listen(port, () => {
