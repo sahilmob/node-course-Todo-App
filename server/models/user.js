@@ -46,7 +46,7 @@ UserSchema.methods.generateAuthToken = function() {
     //this line bind (user) var to the user that we are currently manipulating
     var user = this;
     var access = 'auth'
-    var token = jwt.sign({ _id: user._id.toHexString(), access }, 'abc123').toString()
+    var token = jwt.sign({ _id: user._id.toHexString(), access }, process.env.JWT_SECRET).toString()
     user.tokens = user.tokens.concat([{ access, token }])
         //we are not passing token in (then()) because the is only one (token) var in the function 
     return user.save().then(() => {
@@ -68,7 +68,7 @@ UserSchema.statics.findByToken = function(token) {
     var decoded = null
 
     try {
-        decoded = jwt.verify(token, 'abc123')
+        decoded = jwt.verify(token, process.env.JWT_SECRET)
     } catch (e) {
         // return new Promise((resolve, reject) => {
         //     reject()
